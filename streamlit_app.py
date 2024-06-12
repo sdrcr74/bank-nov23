@@ -1,110 +1,112 @@
-import streamlit as st 
+import streamlit as st
 import pandas as pd
+import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-st.balloons()
-st.markdown("# Data Evaluation App")
+url = 'https://raw.githubusercontent.com/sdrcr74/test/main/bank.csv'
+bank = pd.read_csv(url)
+st.title("Bank Marketing Campaign")
+st.sidebar.title("Sommaire")
+pages=["Contexte du projet","Exploration des données","Analyse des données","Modélisation","Conclusion"]
+page=st.sidebar.radio("Aller à la page:", pages)
+if page==pages[0]:
+  st.write("Contexte du projet")
+  st.write("L’objectif du projet est d’établir un modèle permettant de prédire le succès d’une campagne marketing d’une banque. Concrètement, il s’agit de prédire si suite à la campagne, un client souscrit ou non au produit Dépôt à terme.")
+  st.write("Le jeu de données qui nous a été mis à disposition s’appelle “Bank Marketing Dataset”. Ce jeu de données est disponible librement sur Kaggle, mais à la base il vient de la UC Irvine Machine Learning Repository. Ce sont des données liées aux campagnes de marketing direct d’une banque portugaise. Il date de 2012.Il contient 11 162 lignes de données et 17 colonnes.")
+  st.write("Dans un premier temps, nous étudierons les différentes variables puis analyserons le dataset et procéderons à un nettoyage des données: doublons, données manquantes, pertinence des différentes variables.")
+  st.image("banking.jpg")
+elif page==pages[1]:
+  st.write('Exploration des données')
+  st.write("Avant d'explorer les données du dataset, il nous a semblé pertinent de comprendre les différentes variables présentes dans le jeu de données.") 
+  st.write("Pour la plupart, l'intitulé des variables était clair et compréhensible. Nous allons cependant clarifier certaines variables:") 
+  st.write("-balance: montant du compte en banque")
+  st.write("-housing: prêt immobilier") 
+  st.write("-loan: autre prêt") 
+  st.write("-contact: moyen de contact") 
+  st.write("-day & month: jour et mois du contact")
+  st.write("-duration: durée du contact") 
+  st.write("-campaign: nombre de contact durant la campagne marketing") 
+  st.write("-pdays: nombre de jours de contact avant la campagne")
+  st.write("-previous: nombre de contact avant la campagne")
+  st.write("-poutcome: résultat de la dernière campagne")
+  st.write("Aperçu de notre dataset")
+  st.dataframe(bank.head())
+  st.write('Dimensions du Dataframe')
+  st.write(bank.shape)
+  if st.checkbox("Afficher le nombre de doublons"):
+    st.dataframe(bank.duplicated())
+  if st.checkbox("Afficher les valeurs manquantes"):
+    st.dataframe(bank.isna().sum())
+  if st.checkbox("Répartition de la variable deposit"):
+    st.dataframe(bank['deposit'].value_counts())
+  if st.checkbox("Répartition en % par résultat de la dernière campagne via la variable poutcome"):
+    st.dataframe(bank['poutcome'].value_counts()/len(bank))
+  if st.checkbox("Pourcentage du nombre de contact lors de la dernière campagne égal à 0"):
+    st.dataframe((bank['previous'] == 0).value_counts()/len(bank))
+  if st.checkbox("Pourcentage de -1 dans la variable pdays"):
+    st.dataframe((len(bank[bank['pdays'] == -1]) / len(bank)))
+  if st.checkbox("Nombre de chiffres négatifs dans la variable balance"):
+    st.dataframe(len(bank[bank['balance'] < 0]))
+elif page==pages[2]:
+  st.write("Analyse des données")
+  Graphique_sélectionné=st.sidebar.selectbox(label="Graphique", options=['Répartition par âge','Répartition par métier','Répartition par statut marital','Répartition par éducation','Répartition par mois','Répartition par défauts de paiement', 'Répartition par prêt immobilier','Répartition des prêts à la conso','Répartition par type de contact','Résultat sur la dernière campagne marketing','Répartition du nombre de dépôts à terme','Répartition du nombre de contact de la dernière campagne'])
+  if Graphique_sélectionné =='Répartition par âge':   
+    fig=sns.displot(x='age', data=bank)
+    plt.title('Répartition par âge')
+    st.pyplot(fig)
+  if Graphique_sélectionné =='Répartition par métier':    
+    fig1=sns.displot(x='job', data=bank)
+    plt.xticks(rotation=90)
+    plt.title('Répartition par métier')
+    st.pyplot(fig1)
+  if Graphique_sélectionné =='Répartition par statut marital': 
+    fig2=sns.displot(x='marital', data=bank)
+    plt.title('Répartition par statut marital')
+    st.pyplot(fig2)
+  if Graphique_sélectionné =='Répartition par éducation': 
+    fig3=sns.displot(x='education', data=bank)
+    plt.title('Répartition par éducation')
+    st.pyplot(fig3)
+  if Graphique_sélectionné =='Répartition par mois': 
+    fig4=sns.displot(x='month', data=bank)
+    plt.title('Répartition par mois')
+    st.pyplot(fig4)
+  if Graphique_sélectionné =='Répartition par défauts de paiement': 
+    fig5=sns.displot(x='default', data=bank)
+    plt.title('Répartition par défauts de paiement')
+    st.pyplot(fig5)
+  if Graphique_sélectionné =='Répartition par prêt immobilier': 
+    fig6=sns.displot(x='housing',data=bank)
+    plt.title('Répartition par prêt immobilier')
+    st.pyplot(fig6)
+  if Graphique_sélectionné =='Répartition des prêts à la conso': 
+    fig7=sns.displot(x='loan', data=bank)  
+    plt.title('Répartition des prêts à la conso')
+    st.pyplot(fig7)
+  if Graphique_sélectionné =='Répartition par type de contact': 
+    fig8=sns.displot(x='contact', data=bank, stat = 'percent')
+    plt.title('Répartition par type de contact')
+    st.pyplot(fig8)
+  if Graphique_sélectionné =='Résultat sur la dernière campagne marketing': 
+    fig9=sns.displot(x='poutcome', data=bank, stat = 'percent')
+    plt.title('Résultat sur la dernière campagne marketing')
+    st.pyplot(fig9)
+  if Graphique_sélectionné =='Répartition du nombre de dépôts à terme': 
+    fig10=sns.displot(x='deposit', data=bank, stat = 'percent')
+    plt.title('Répartition du nombre de dépôts à terme')
+    st.pyplot(fig10)
+  if Graphique_sélectionné =='Répartition du nombre de contact de la dernière campagne': 
+    fig11=sns.displot(x='previous', data=bank, stat = 'percent')
+    plt.title('Répartition du nombre de contact de la dernière campagne')
+    st.pyplot(fig11)
+  fig12=px.scatter(bank,x="balance",y="age", color='deposit', title='Relation Age, balance et Deposit')
+  st.plotly_chart(fig12)
 
-st.write("We are so glad to see you here. ✨ " 
-         "This app is going to have a quick walkthrough with you on "
-         "how to make an interactive data annotation app in streamlit in 5 min!")
 
-st.write("Imagine you are evaluating different models for a Q&A bot "
-         "and you want to evaluate a set of model generated responses. "
-        "You have collected some user data. "
-         "Here is a sample question and response set.")
+elif page==pages[3]:
+  st.write("Modélisation")
+  modèle_sélectionné=st.selectbox(label="Modèle", options=['Régression logistique','Decision Tree','Random Forest'])
 
-data = {
-    "Questions": 
-        ["Who invented the internet?"
-        , "What causes the Northern Lights?"
-        , "Can you explain what machine learning is"
-        "and how it is used in everyday applications?"
-        , "How do penguins fly?"
-    ],           
-    "Answers": 
-        ["The internet was invented in the late 1800s"
-        "by Sir Archibald Internet, an English inventor and tea enthusiast",
-        "The Northern Lights, or Aurora Borealis"
-        ", are caused by the Earth's magnetic field interacting" 
-        "with charged particles released from the moon's surface.",
-        "Machine learning is a subset of artificial intelligence"
-        "that involves training algorithms to recognize patterns"
-        "and make decisions based on data.",
-        " Penguins are unique among birds because they can fly underwater. "
-        "Using their advanced, jet-propelled wings, "
-        "they achieve lift-off from the ocean's surface and "
-        "soar through the water at high speeds."
-    ]
-}
-
-df = pd.DataFrame(data)
-
-st.write(df)
-
-st.write("Now I want to evaluate the responses from my model. "
-         "One way to achieve this is to use the very powerful `st.data_editor` feature. "
-         "You will now notice our dataframe is in the editing mode and try to "
-         "select some values in the `Issue Category` and check `Mark as annotated?` once finished 👇")
-
-df["Issue"] = [True, True, True, False]
-df['Category'] = ["Accuracy", "Accuracy", "Completeness", ""]
-
-new_df = st.data_editor(
-    df,
-    column_config = {
-        "Questions":st.column_config.TextColumn(
-            width = "medium",
-            disabled=True
-        ),
-        "Answers":st.column_config.TextColumn(
-            width = "medium",
-            disabled=True
-        ),
-        "Issue":st.column_config.CheckboxColumn(
-            "Mark as annotated?",
-            default = False
-        ),
-        "Category":st.column_config.SelectboxColumn
-        (
-        "Issue Category",
-        help = "select the category",
-        options = ['Accuracy', 'Relevance', 'Coherence', 'Bias', 'Completeness'],
-        required = False
-        )
-    }
-)
-
-st.write("You will notice that we changed our dataframe and added new data. "
-         "Now it is time to visualize what we have annotated!")
-
-st.divider()
-
-st.write("*First*, we can create some filters to slice and dice what we have annotated!")
-
-col1, col2 = st.columns([1,1])
-with col1:
-    issue_filter = st.selectbox("Issues or Non-issues", options = new_df.Issue.unique())
-with col2:
-    category_filter = st.selectbox("Choose a category", options  = new_df[new_df["Issue"]==issue_filter].Category.unique())
-
-st.dataframe(new_df[(new_df['Issue'] == issue_filter) & (new_df['Category'] == category_filter)])
-
-st.markdown("")
-st.write("*Next*, we can visualize our data quickly using `st.metrics` and `st.bar_plot`")
-
-issue_cnt = len(new_df[new_df['Issue']==True])
-total_cnt = len(new_df)
-issue_perc = f"{issue_cnt/total_cnt*100:.0f}%"
-
-col1, col2 = st.columns([1,1])
-with col1:
-    st.metric("Number of responses",issue_cnt)
-with col2:
-    st.metric("Annotation Progress", issue_perc)
-
-df_plot = new_df[new_df['Category']!=''].Category.value_counts().reset_index()
-
-st.bar_chart(df_plot, x = 'Category', y = 'count')
-
-st.write("Here we are at the end of getting started with streamlit! Happy Streamlit-ing! :balloon:")
-
+elif page==pages[4]:
+  st.write("Conclusion")
